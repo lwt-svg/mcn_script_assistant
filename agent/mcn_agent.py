@@ -159,7 +159,19 @@ def check_compliance_node(state: AgentState) -> dict:
         compliance = _check_compliance(script, style)
         status = "[PASS] 通过" if compliance.passed else "[FAIL] 需修改"
         _log(state, f"  → 检查结果: {status}")
-        return {"compliance": compliance, "iterations": state.get("iterations", 0) + 1}
+
+        # 在 node 中生成 fix_instructions（而非在条件路由函数中），
+        # 因为路由函数只能返回目标节点名，无法更新 state
+        fix_instructions = ""
+        if not compliance.passed:
+            fix_instructions = generate_fix_instructions(script, compliance)
+            _log(state, f"  → 生成修复指令 (第{state.get('iterations', 0) + 1}次迭代)...")
+
+        return {
+            "compliance": compliance,
+            "iterations": state.get("iterations", 0) + 1,
+            "fix_instructions": fix_instructions,
+        }
     except Exception as e:
         _log(state, f"  ❌ 合规检查失败: {e}")
         return {"errors": state.get("errors", []) + [f"check_compliance: {e}"]}
@@ -225,11 +237,7 @@ def route_after_compliance(state: AgentState) -> Literal["fix_script", "write_ou
         return "write_output"
 
     if iterations < max_iter:
-        # Generate fix instructions for the next iteration
-        fix_instructions = generate_fix_instructions(state["script"], compliance)
-        _log(state, f"  → 生成修复指令 (第{iterations+1}次迭代)...")
-        # We need to update fix_instructions in state for the fix_script node
-        # Since we can't return it from a condition function, we'll set it in the compliance node
+        # fix_instructions 已在 check_compliance_node 中生成并写回 state
         return "fix_script"
 
     _log(state, f"  → ⚠️  已达到最大迭代次数 ({max_iter})，输出当前脚本")
