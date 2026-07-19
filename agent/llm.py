@@ -33,7 +33,8 @@ class TokenUsage:
     def estimate_cost(self, model: str = ""):
         model = model or LLM_CONFIG.get("model", "gpt-4o")
         pricing = {"gpt-4o": (2.50, 10.00), "gpt-4o-mini": (0.15, 0.60),
-                    "deepseek-chat": (0.27, 1.10), "deepseek-reasoner": (0.55, 2.19)}
+                    "deepseek-chat": (0.27, 1.10), "deepseek-reasoner": (0.55, 2.19),
+                    "deepseek-v4-flash": (0.14, 0.28), "deepseek-v4-pro": (0.56, 1.10)}
         p, c = pricing.get(model, (2.50, 10.00))
         return (self.prompt_tokens / 1_000_000 * p + self.completion_tokens / 1_000_000 * c)
 
