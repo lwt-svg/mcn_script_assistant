@@ -102,7 +102,7 @@ pip install -r requirements.txt
 ```bash
 LLM_API_KEY=sk-xxx
 LLM_API_BASE=https://api.deepseek.com
-LLM_MODEL=deepseek-chat
+LLM_MODEL=deepseek-v4-flash
 FEISHU_APP_ID=xxx       # 可选
 FEISHU_APP_SECRET=xxx   # 可选
 ```
